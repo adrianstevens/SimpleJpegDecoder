@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>SimpleJpegDecoder</AssemblyName>
+    <PackageProjectUrl>https://github.com/adrianstevens/SimpleJpegDecoder</PackageProjectUrl>
+    <PackageId>SimpleJpegDecoder</PackageId>
+    <RepositoryUrl>https://github.com/adrianstevens/SimpleJpegDecoder</RepositoryUrl>
+    <PackageTags>Meadow, Jpeg, decoder, NanoJPEG, NanoJPEG.NET</PackageTags>
+    <Version>0.1.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Jpeg decoder package using NanoJPEG.NET</Description>
+    <Authors>Adrian Stevens</Authors>
+    <Company />
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>
