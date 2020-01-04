@@ -1,0 +1,3 @@
+[submodule "NanoJPEG.NET"]
+	path = NanoJPEG.NET
+	url = https://github.com/Deathspike/NanoJPEG.NET
