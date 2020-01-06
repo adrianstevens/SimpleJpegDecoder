@@ -13,7 +13,7 @@ namespace SimpleJpegDecoder
         /// <summary>
         /// Height of loaded image in pixels
         /// </summary>
-        public int Height => nanoJpeg == null ? 0 : nanoJpeg.njGetWidth();
+        public int Height => nanoJpeg == null ? 0 : nanoJpeg.njGetHeight();
         /// <summary>
         /// Size of decoded image in bytes
         /// </summary>
