@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace SimpleJpegDecoder
 {
@@ -9,25 +11,27 @@ namespace SimpleJpegDecoder
         /// <summary>
         /// Width of loaded image in pixels
         /// </summary>
-        public int Width => nanoJpeg == null?0:nanoJpeg.njGetWidth();
+        public int Width => nanoJpeg == null?0:nanoJpeg.Width;
         /// <summary>
         /// Height of loaded image in pixels
         /// </summary>
-        public int Height => nanoJpeg == null ? 0 : nanoJpeg.njGetHeight();
+        public int Height => nanoJpeg == null ? 0 : nanoJpeg.Height;
         /// <summary>
         /// Size of decoded image in bytes
         /// </summary>
-        public int ImageSize => nanoJpeg == null ? 0 : nanoJpeg.njGetImageSize();
+        public int ImageSize => nanoJpeg == null ? 0 : nanoJpeg.ImageSize;
         /// <summary>
         /// Is image color (true) or greyscale (false)
         /// </summary>
-        public bool IsColor => nanoJpeg == null ? false : nanoJpeg.njIsColor();
+        public bool IsColor => nanoJpeg == null ? false : nanoJpeg.IsColor;
 
         #endregion
 
         #region Fields 
 
-        KeyJ.NanoJPEG nanoJpeg;
+        NanoJpeg.NJImage nanoJpeg;
+
+        byte[] decodedData;
 
         #endregion
 
@@ -35,7 +39,7 @@ namespace SimpleJpegDecoder
 
         public JpegDecoder()
         {
-            nanoJpeg = new KeyJ.NanoJPEG();
+            nanoJpeg = new NanoJpeg.NJImage();
         }
 
         #endregion
@@ -63,8 +67,14 @@ namespace SimpleJpegDecoder
         /// </summary>
         public byte[] DecodeJpeg(byte[] jpegData)
         {
-            nanoJpeg.njDecode(jpegData);
-            return nanoJpeg.njGetImage();
+            nanoJpeg.Decode(jpegData);
+
+            decodedData = new byte[nanoJpeg.ImageSize];
+            unsafe
+            {
+                Marshal.Copy((IntPtr)nanoJpeg.Image, decodedData, 0, nanoJpeg.ImageSize);
+            }
+            return decodedData;
         }
 
         /// <summary>
@@ -72,7 +82,16 @@ namespace SimpleJpegDecoder
         /// </summary>
         public byte[] GetImageData()
         {
-            return nanoJpeg.njGetImage();
+            return decodedData;
+        }
+
+        /// <summary>
+        /// Reset decoder and clear data buffer
+        /// </summary>
+        public void Reset()
+        {
+            nanoJpeg = new NanoJpeg.NJImage();
+            decodedData = null; 
         }
 
         #endregion
