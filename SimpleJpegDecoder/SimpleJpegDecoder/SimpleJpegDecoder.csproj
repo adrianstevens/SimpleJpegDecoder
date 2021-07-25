@@ -7,14 +7,13 @@
     <PackageId>SimpleJpegDecoder</PackageId>
     <RepositoryUrl>https://github.com/adrianstevens/SimpleJpegDecoder</RepositoryUrl>
     <PackageTags>Meadow, Jpeg, decoder, NanoJPEG, NanoJPEG.NET</PackageTags>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Jpeg decoder package using NanoJPEG.NET</Description>
     <Authors>Adrian Stevens</Authors>
     <Company />
-    <PackageReleaseNotes>Add .NET Standard support</PackageReleaseNotes>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PackageReleaseNotes>Updated to latest NanoJpeg.NET code with improved performance</PackageReleaseNotes>
+    <Configurations>Release;Debug</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
