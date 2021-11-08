@@ -1,5 +1,7 @@
 # SimpleJpegDecoder
-A light-weight C# jpeg decoder based on NanoJpeg - targeting Meadow but should work on most modern C# platforms. https://www.wildernesslabs.co/meadow
+A light-weight C# jpeg decoder based on NanoJpeg - targeting Meadow but should work on most modern C# platforms - https://www.wildernesslabs.co/meadow
+
+Nuget package is hosted on nuget.org: https://www.nuget.org/packages/SimpleJpegDecoder/ 
 
 
 This code uses a submodule of NanoJpeg.NET (by Jbildstein) C# port of Martin Fiedler's NanoJpeg originally written in C. 
