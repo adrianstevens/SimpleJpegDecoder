@@ -54,11 +54,18 @@ namespace SimpleJpegDecoder
         /// <returns></returns>
         public byte[] DecodeJpeg(Stream jpegStream)
         {
-            using (var ms = new MemoryStream())
+            using (var buffer = new MemoryStream())
             {
-                jpegStream.CopyTo(ms);
-                return DecodeJpeg(ms.ToArray());
+                jpegStream.CopyTo(buffer);
+                nanoJpeg.Decode(buffer); // uses GetBuffer() internally — no ToArray() copy
             }
+
+            decodedData = new byte[nanoJpeg.ImageSize];
+            unsafe
+            {
+                Marshal.Copy((IntPtr)nanoJpeg.Image, decodedData, 0, nanoJpeg.ImageSize);
+            }
+            return decodedData;
         }
 
         /// <summary>

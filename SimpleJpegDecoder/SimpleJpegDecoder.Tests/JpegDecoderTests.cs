@@ -265,6 +265,36 @@ namespace SimpleJpegDecoder.Tests
         }
 
         // -------------------------------------------------------------------------
+        // DecodeJpeg(Stream) — non-seekable stream (exercises the internal buffer path)
+        // -------------------------------------------------------------------------
+
+        [Fact]
+        public void DecodeJpeg_NonSeekableStream_DecodesCorrectly()
+        {
+            var jpeg = CreateColorJpeg(8, 8);
+            var decoder = new JpegDecoder();
+            using (var wrapped = new NonSeekableStream(jpeg))
+            {
+                var result = decoder.DecodeJpeg(wrapped);
+                Assert.Equal(8, decoder.Width);
+                Assert.Equal(8, decoder.Height);
+                Assert.NotNull(result);
+            }
+        }
+
+        [Fact]
+        public void DecodeJpeg_NonSeekableStream_ProducesSameOutputAsByteArray()
+        {
+            var jpeg = CreateColorJpeg(8, 8);
+            var fromBytes = new JpegDecoder().DecodeJpeg(jpeg);
+            using (var wrapped = new NonSeekableStream(jpeg))
+            {
+                var fromStream = new JpegDecoder().DecodeJpeg(wrapped);
+                Assert.Equal(fromBytes, fromStream);
+            }
+        }
+
+        // -------------------------------------------------------------------------
         // IDisposable / Reset dispose
         // -------------------------------------------------------------------------
 
@@ -327,5 +357,26 @@ namespace SimpleJpegDecoder.Tests
             Assert.Equal(8, decoder.Width);
             Assert.NotNull(result);
         }
+    }
+
+    /// <summary>
+    /// Wraps a byte array in a Stream that is not a MemoryStream,
+    /// so the non-fast-path in DecodeJpeg(Stream) is exercised.
+    /// </summary>
+    internal class NonSeekableStream : Stream
+    {
+        private readonly MemoryStream _inner;
+        public NonSeekableStream(byte[] data) => _inner = new MemoryStream(data);
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new System.NotSupportedException();
+        public override long Position { get => throw new System.NotSupportedException(); set => throw new System.NotSupportedException(); }
+        public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new System.NotSupportedException();
+        public override void SetLength(long value) => throw new System.NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new System.NotSupportedException();
+        protected override void Dispose(bool disposing) { if (disposing) _inner.Dispose(); base.Dispose(disposing); }
     }
 }
