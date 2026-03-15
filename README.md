@@ -1,16 +1,70 @@
 # SimpleJpegDecoder
-A light-weight C# jpeg decoder based on NanoJpeg - targeting Meadow but should work on most modern C# platforms - https://www.wildernesslabs.co/meadow
 
-Nuget package is hosted on nuget.org: https://www.nuget.org/packages/SimpleJpegDecoder/ 
+A lightweight C# JPEG decoder targeting [Meadow](https://www.wildernesslabs.co/meadow) and other memory-constrained platforms. Works on any modern C# platform supporting .NET Standard 2.0 or .NET Framework 4.7.2.
 
+NuGet: https://www.nuget.org/packages/SimpleJpegDecoder/
 
-This code uses a submodule of NanoJpeg.NET (by Jbildstein) C# port of Martin Fiedler's NanoJpeg originally written in C. 
+## Features
 
-https://github.com/JBildstein/NanoJpeg.Net
+- Decodes baseline JPEG (no progressive or lossless)
+- Supports 8-bit grayscale and YCbCr (RGB) images
+- Supports any power-of-two chroma subsampling ratio
+- Supports restart markers
+- Implements `IDisposable` for deterministic release of unmanaged memory
+- Zero-allocation decode path for repeated use (e.g. display refresh on Meadow)
 
-- decodes baseline JPEG only, no progressive or lossless JPEG
-- supports 8-bit grayscale and YCbCr images, no 16 bit, CMYK or other color spaces
-- supports any power-of-two chroma subsampling ratio
-- supports restart markers
+## Usage
 
-For more info, visit http://keyj.emphy.de/nanojpeg/
+### Basic decode from byte array
+
+```csharp
+var decoder = new JpegDecoder();
+byte[] pixels = decoder.DecodeJpeg(jpegBytes);
+// decoder.Width, decoder.Height, decoder.IsColor are now populated
+```
+
+### Decode from a Stream
+
+```csharp
+using var stream = File.OpenRead("image.jpg");
+byte[] pixels = decoder.DecodeJpeg(stream);
+```
+
+### Zero-allocation decode (recommended for Meadow)
+
+Pre-allocate the output buffer once and reuse it across frames to avoid GC pressure:
+
+```csharp
+var decoder = new JpegDecoder();
+
+// decode once to find dimensions
+decoder.DecodeJpeg(firstFrame);
+var outputBuffer = new byte[decoder.Width * decoder.Height * 3];
+
+// reuse buffer for every subsequent frame — no heap allocation
+while (true)
+{
+    decoder.DecodeJpeg(GetNextFrame(), outputBuffer);
+    display.Draw(outputBuffer);
+}
+```
+
+### Cleanup
+
+`JpegDecoder` holds unmanaged memory internally. Use it in a `using` block or call `Dispose()` when done:
+
+```csharp
+using (var decoder = new JpegDecoder())
+{
+    var pixels = decoder.DecodeJpeg(jpegBytes);
+}
+```
+
+## Limitations
+
+- Baseline JPEG only — no progressive, lossless, CMYK, or 16-bit
+- Minimum image size of 8×8 pixels (NanoJpeg constraint with 4:2:0 chroma subsampling)
+
+## Credits
+
+Built on [NanoJpeg.NET](https://github.com/JBildstein/NanoJpeg.Net) by Johannes Bildstein — a C# port of [NanoJPEG](http://keyj.emphy.de/nanojpeg/) by Martin J. Fiedler.
