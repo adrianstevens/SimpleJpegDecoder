@@ -295,6 +295,88 @@ namespace SimpleJpegDecoder.Tests
         }
 
         // -------------------------------------------------------------------------
+        // DecodeJpeg(byte[], byte[]) — pre-allocated output buffer
+        // -------------------------------------------------------------------------
+
+        [Fact]
+        public void DecodeJpeg_WithOutputBuffer_ProducesSamePixelsAsAllocatingOverload()
+        {
+            var jpeg = CreateColorJpeg(16, 8);
+            var expected = new JpegDecoder().DecodeJpeg(jpeg);
+
+            var decoder = new JpegDecoder();
+            var outputBuffer = new byte[16 * 8 * 3];
+            decoder.DecodeJpeg(jpeg, outputBuffer);
+
+            Assert.Equal(expected, outputBuffer);
+        }
+
+        [Fact]
+        public void DecodeJpeg_WithOutputBuffer_SetsWidthAndHeight()
+        {
+            var decoder = new JpegDecoder();
+            var jpeg = CreateColorJpeg(16, 8);
+            decoder.DecodeJpeg(jpeg, new byte[16 * 8 * 3]);
+
+            Assert.Equal(16, decoder.Width);
+            Assert.Equal(8, decoder.Height);
+        }
+
+        [Fact]
+        public void DecodeJpeg_WithOutputBuffer_GetImageDataReturnsProvidedBuffer()
+        {
+            var decoder = new JpegDecoder();
+            var jpeg = CreateColorJpeg(8, 8);
+            var outputBuffer = new byte[8 * 8 * 3];
+            decoder.DecodeJpeg(jpeg, outputBuffer);
+
+            Assert.Same(outputBuffer, decoder.GetImageData());
+        }
+
+        [Fact]
+        public void DecodeJpeg_WithOutputBuffer_LargerThanNeeded_Succeeds()
+        {
+            var decoder = new JpegDecoder();
+            var jpeg = CreateColorJpeg(8, 8);
+            var outputBuffer = new byte[8 * 8 * 3 + 256]; // extra space is fine
+            decoder.DecodeJpeg(jpeg, outputBuffer);
+
+            Assert.Equal(8, decoder.Width);
+        }
+
+        [Fact]
+        public void DecodeJpeg_WithOutputBuffer_TooSmall_ThrowsArgumentException()
+        {
+            var decoder = new JpegDecoder();
+            var jpeg = CreateColorJpeg(8, 8);
+            var tooSmall = new byte[10];
+
+            Assert.Throws<ArgumentException>(() => decoder.DecodeJpeg(jpeg, tooSmall));
+        }
+
+        [Fact]
+        public void DecodeJpeg_Stream_WithOutputBuffer_ProducesSamePixelsAsAllocatingOverload()
+        {
+            var jpeg = CreateColorJpeg(16, 8);
+            var expected = new JpegDecoder().DecodeJpeg(jpeg);
+
+            var decoder = new JpegDecoder();
+            var outputBuffer = new byte[16 * 8 * 3];
+            decoder.DecodeJpeg(new MemoryStream(jpeg), outputBuffer);
+
+            Assert.Equal(expected, outputBuffer);
+        }
+
+        [Fact]
+        public void DecodeJpeg_Stream_WithOutputBuffer_TooSmall_ThrowsArgumentException()
+        {
+            var decoder = new JpegDecoder();
+            var jpeg = CreateColorJpeg(8, 8);
+
+            Assert.Throws<ArgumentException>(() => decoder.DecodeJpeg(new MemoryStream(jpeg), new byte[10]));
+        }
+
+        // -------------------------------------------------------------------------
         // IDisposable / Reset dispose
         // -------------------------------------------------------------------------
 
