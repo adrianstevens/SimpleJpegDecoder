@@ -49,12 +49,10 @@ namespace SimpleJpegDecoder.Tests
         }
 
         [Fact]
-        public void IsColor_BeforeDecode_ReturnsTrue()
+        public void IsColor_BeforeDecode_ReturnsFalse()
         {
-            // NJImage initializes ncomp=0; IsColor returns (ncomp != 1) = true.
-            // The null guard in JpegDecoder.IsColor is dead code — nanoJpeg is never null after construction.
             var decoder = new JpegDecoder();
-            Assert.True(decoder.IsColor);
+            Assert.False(decoder.IsColor);
         }
 
         [Fact]
@@ -153,6 +151,26 @@ namespace SimpleJpegDecoder.Tests
         // -------------------------------------------------------------------------
         // Reset
         // -------------------------------------------------------------------------
+
+        [Fact]
+        public void Reset_AfterDecode_ClearsIsColor()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            Assert.True(decoder.IsColor);
+            decoder.Reset();
+            Assert.False(decoder.IsColor);
+        }
+
+        [Fact]
+        public void Dispose_AfterDecode_ClearsIsColor()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            Assert.True(decoder.IsColor);
+            decoder.Dispose();
+            Assert.False(decoder.IsColor);
+        }
 
         [Fact]
         public void Reset_AfterDecode_ClearsWidth()

@@ -24,13 +24,15 @@ namespace SimpleJpegDecoder
 
         /// <summary>
         /// Returns true if the decoded image is color (RGB), false if grayscale.
-        /// Note: returns true before any image has been decoded.
+        /// Returns false before any image has been decoded.
         /// </summary>
-        public bool IsColor => nanoJpeg == null ? false : nanoJpeg.IsColor;
+        public bool IsColor => _hasDecoded && nanoJpeg != null && nanoJpeg.IsColor;
 
         NanoJpeg.NJImage nanoJpeg;
 
         byte[] decodedData;
+
+        bool _hasDecoded;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JpegDecoder"/> class.
@@ -59,6 +61,7 @@ namespace SimpleJpegDecoder
             {
                 Marshal.Copy((IntPtr)nanoJpeg.Image, decodedData, 0, nanoJpeg.ImageSize);
             }
+            _hasDecoded = true;
             return decodedData;
         }
 
@@ -77,6 +80,7 @@ namespace SimpleJpegDecoder
             {
                 Marshal.Copy((IntPtr)nanoJpeg.Image, decodedData, 0, nanoJpeg.ImageSize);
             }
+            _hasDecoded = true;
             return decodedData;
         }
 
@@ -101,6 +105,7 @@ namespace SimpleJpegDecoder
                 Marshal.Copy((IntPtr)nanoJpeg.Image, outputBuffer, 0, nanoJpeg.ImageSize);
             }
             decodedData = outputBuffer;
+            _hasDecoded = true;
         }
 
         /// <summary>
@@ -128,6 +133,7 @@ namespace SimpleJpegDecoder
                 Marshal.Copy((IntPtr)nanoJpeg.Image, outputBuffer, 0, nanoJpeg.ImageSize);
             }
             decodedData = outputBuffer;
+            _hasDecoded = true;
         }
 
         /// <summary>
@@ -148,6 +154,7 @@ namespace SimpleJpegDecoder
             nanoJpeg.Dispose();
             nanoJpeg = new NanoJpeg.NJImage();
             decodedData = null;
+            _hasDecoded = false;
         }
 
         /// <summary>
@@ -158,6 +165,7 @@ namespace SimpleJpegDecoder
             nanoJpeg?.Dispose();
             nanoJpeg = null;
             decodedData = null;
+            _hasDecoded = false;
         }
 
     }
