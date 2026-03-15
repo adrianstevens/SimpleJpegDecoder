@@ -7,19 +7,24 @@ namespace SimpleJpegDecoder
     public class JpegDecoder : IDisposable
     {
         /// <summary>
-        /// Width of loaded image in pixels
+        /// Width of the decoded image in pixels. Returns 0 if no image has been decoded.
         /// </summary>
         public int Width => nanoJpeg == null?0:nanoJpeg.Width;
+
         /// <summary>
-        /// Height of loaded image in pixels
+        /// Height of the decoded image in pixels. Returns 0 if no image has been decoded.
         /// </summary>
         public int Height => nanoJpeg == null ? 0 : nanoJpeg.Height;
+
         /// <summary>
-        /// Size of decoded image in bytes
+        /// Size of the decoded image data in bytes (Width × Height × channels).
+        /// Returns 0 if no image has been decoded.
         /// </summary>
         public int ImageSize => nanoJpeg == null ? 0 : nanoJpeg.ImageSize;
+
         /// <summary>
-        /// Is image color (true) or greyscale (false)
+        /// Returns true if the decoded image is color (RGB), false if grayscale.
+        /// Note: returns true before any image has been decoded.
         /// </summary>
         public bool IsColor => nanoJpeg == null ? false : nanoJpeg.IsColor;
 
@@ -27,17 +32,20 @@ namespace SimpleJpegDecoder
 
         byte[] decodedData;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JpegDecoder"/> class.
+        /// </summary>
         public JpegDecoder()
         {
             nanoJpeg = new NanoJpeg.NJImage();
         }
 
         /// <summary>
-        /// Decode compressed jpeg from a Stream and
-        /// return uncompressed data in a byte array
+        /// Decodes a compressed JPEG from a stream and returns the uncompressed pixel data.
         /// </summary>
-        /// <param name="jpegStream"></param>
-        /// <returns></returns>
+        /// <param name="jpegStream">Stream containing compressed JPEG data.</param>
+        /// <returns>Byte array of uncompressed pixel data (RGB or grayscale).</returns>
+        /// <exception cref="NanoJpeg.NJException">Thrown if the data is not a valid baseline JPEG.</exception>
         public byte[] DecodeJpeg(Stream jpegStream)
         {
             using (var buffer = new MemoryStream())
@@ -55,9 +63,11 @@ namespace SimpleJpegDecoder
         }
 
         /// <summary>
-        /// Decode compressed jpeg from a byte array and
-        /// return uncompressed data in a byte array
+        /// Decodes a compressed JPEG from a byte array and returns the uncompressed pixel data.
         /// </summary>
+        /// <param name="jpegData">Compressed JPEG data.</param>
+        /// <returns>Byte array of uncompressed pixel data (RGB or grayscale).</returns>
+        /// <exception cref="NanoJpeg.NJException">Thrown if the data is not a valid baseline JPEG.</exception>
         public byte[] DecodeJpeg(byte[] jpegData)
         {
             nanoJpeg.Decode(jpegData);
@@ -71,13 +81,14 @@ namespace SimpleJpegDecoder
         }
 
         /// <summary>
-        /// Decode compressed jpeg from a byte array into a caller-provided output buffer.
+        /// Decodes a compressed JPEG from a byte array into a caller-provided output buffer.
         /// Use this overload to avoid a heap allocation on every decode —
         /// allocate the buffer once and reuse it across frames.
         /// </summary>
-        /// <param name="jpegData">Compressed JPEG data</param>
-        /// <param name="outputBuffer">Buffer to write decoded pixels into. Must be at least Width * Height * channels bytes.</param>
-        /// <exception cref="ArgumentException">outputBuffer is too small for the decoded image</exception>
+        /// <param name="jpegData">Compressed JPEG data.</param>
+        /// <param name="outputBuffer">Buffer to write decoded pixels into. Must be at least Width × Height × channels bytes.</param>
+        /// <exception cref="ArgumentException">Thrown if outputBuffer is too small for the decoded image.</exception>
+        /// <exception cref="NanoJpeg.NJException">Thrown if the data is not a valid baseline JPEG.</exception>
         public void DecodeJpeg(byte[] jpegData, byte[] outputBuffer)
         {
             nanoJpeg.Decode(jpegData);
@@ -93,13 +104,14 @@ namespace SimpleJpegDecoder
         }
 
         /// <summary>
-        /// Decode compressed jpeg from a Stream into a caller-provided output buffer.
+        /// Decodes a compressed JPEG from a stream into a caller-provided output buffer.
         /// Use this overload to avoid a heap allocation on every decode —
         /// allocate the buffer once and reuse it across frames.
         /// </summary>
-        /// <param name="jpegStream">Stream containing compressed JPEG data</param>
-        /// <param name="outputBuffer">Buffer to write decoded pixels into. Must be at least Width * Height * channels bytes.</param>
-        /// <exception cref="ArgumentException">outputBuffer is too small for the decoded image</exception>
+        /// <param name="jpegStream">Stream containing compressed JPEG data.</param>
+        /// <param name="outputBuffer">Buffer to write decoded pixels into. Must be at least Width × Height × channels bytes.</param>
+        /// <exception cref="ArgumentException">Thrown if outputBuffer is too small for the decoded image.</exception>
+        /// <exception cref="NanoJpeg.NJException">Thrown if the data is not a valid baseline JPEG.</exception>
         public void DecodeJpeg(Stream jpegStream, byte[] outputBuffer)
         {
             using (var buffer = new MemoryStream())
@@ -119,15 +131,17 @@ namespace SimpleJpegDecoder
         }
 
         /// <summary>
-        /// Get decoded uncompressed data in a byte array
+        /// Returns the uncompressed pixel data from the last successful decode.
         /// </summary>
+        /// <returns>Byte array of uncompressed pixel data, or null if no image has been decoded.</returns>
         public byte[] GetImageData()
         {
             return decodedData;
         }
 
         /// <summary>
-        /// Reset decoder and clear data buffer
+        /// Resets the decoder, disposing the current internal state and clearing the data buffer.
+        /// Call this before reusing the decoder if you need to release unmanaged memory immediately.
         /// </summary>
         public void Reset()
         {
