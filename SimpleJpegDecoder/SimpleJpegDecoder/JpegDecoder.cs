@@ -4,6 +4,14 @@ using System.Runtime.InteropServices;
 
 namespace SimpleJpegDecoder
 {
+    /// <summary>
+    /// Decodes baseline JPEG images into raw pixel data.
+    /// Supports 8-bit grayscale and YCbCr (RGB) images.
+    /// <para>
+    /// This class is not thread-safe. Do not share a single instance across threads
+    /// without external synchronization.
+    /// </para>
+    /// </summary>
     public class JpegDecoder : IDisposable
     {
         /// <summary>

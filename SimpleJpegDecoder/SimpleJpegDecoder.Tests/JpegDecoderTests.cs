@@ -1,8 +1,9 @@
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using NanoJpeg;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
 
 namespace SimpleJpegDecoder.Tests
@@ -10,15 +11,27 @@ namespace SimpleJpegDecoder.Tests
     public class JpegDecoderTests
     {
         /// <summary>
-        /// Generates a valid baseline JPEG using System.Drawing.
-        /// System.Drawing always produces 3-channel YCbCr JPEGs, so IsColor will be true.
+        /// Generates a valid 3-channel baseline JPEG using ImageSharp.
         /// </summary>
         private static byte[] CreateColorJpeg(int width, int height)
         {
-            using (var bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb))
+            using (var image = new Image<Rgb24>(width, height))
             using (var ms = new MemoryStream())
             {
-                bmp.Save(ms, ImageFormat.Jpeg);
+                image.Save(ms, new JpegEncoder { ColorType = JpegEncodingColor.Rgb });
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Generates a valid 1-channel grayscale JPEG using ImageSharp.
+        /// </summary>
+        private static byte[] CreateGrayscaleJpeg(int width, int height)
+        {
+            using (var image = new Image<L8>(width, height))
+            using (var ms = new MemoryStream())
+            {
+                image.Save(ms, new JpegEncoder { ColorType = JpegEncodingColor.Luminance });
                 return ms.ToArray();
             }
         }
@@ -280,6 +293,54 @@ namespace SimpleJpegDecoder.Tests
             var decoder = new JpegDecoder();
             var notJpeg = new byte[] { 0x00, 0x01, 0x02, 0x03 };
             Assert.Throws<NJException>(() => decoder.DecodeJpeg(new MemoryStream(notJpeg)));
+        }
+
+        // -------------------------------------------------------------------------
+        // Grayscale JPEG
+        // -------------------------------------------------------------------------
+
+        [Fact]
+        public void DecodeJpeg_GrayscaleImage_IsColorFalse()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateGrayscaleJpeg(8, 8));
+            Assert.False(decoder.IsColor);
+        }
+
+        [Fact]
+        public void DecodeJpeg_GrayscaleImage_SetsCorrectDimensions()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateGrayscaleJpeg(16, 8));
+            Assert.Equal(16, decoder.Width);
+            Assert.Equal(8, decoder.Height);
+        }
+
+        [Fact]
+        public void DecodeJpeg_GrayscaleImage_DataLengthIsWidthTimesHeight()
+        {
+            var decoder = new JpegDecoder();
+            var result = decoder.DecodeJpeg(CreateGrayscaleJpeg(16, 8));
+            Assert.Equal(16 * 8, result.Length); // grayscale = 1 byte per pixel
+        }
+
+        [Fact]
+        public void DecodeJpeg_GrayscaleImage_ImageSizeEqualsWidthTimesHeight()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateGrayscaleJpeg(8, 8));
+            Assert.Equal(decoder.Width * decoder.Height, decoder.ImageSize);
+        }
+
+        [Fact]
+        public void DecodeJpeg_GrayscaleImage_WithOutputBuffer_Succeeds()
+        {
+            var decoder = new JpegDecoder();
+            var jpeg = CreateGrayscaleJpeg(8, 8);
+            var outputBuffer = new byte[8 * 8]; // 1 byte per pixel
+            decoder.DecodeJpeg(jpeg, outputBuffer);
+            Assert.Equal(8, decoder.Width);
+            Assert.False(decoder.IsColor);
         }
 
         // -------------------------------------------------------------------------

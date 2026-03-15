@@ -9,10 +9,16 @@
     <PackageTags>Meadow, Jpeg, decoder, NanoJPEG, NanoJPEG.NET</PackageTags>
     <Version>0.5.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>Jpeg decoder package using NanoJPEG.NET</Description>
+    <Description>Lightweight JPEG decoder for .NET targeting memory-constrained platforms such as Meadow. Supports grayscale and RGB baseline JPEG. Includes a zero-allocation decode path for repeated frame decoding.</Description>
     <Authors>Adrian Stevens</Authors>
     <Company />
-    <PackageReleaseNotes>Updated to latest NanoJpeg.NET code with improved performance</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      - JpegDecoder now implements IDisposable for deterministic release of unmanaged memory
+      - Fixed memory leak in Reset() — previous NJImage instance is now disposed before replacement
+      - Fixed IsColor incorrectly returning true before any image has been decoded
+      - Stream overload no longer allocates a redundant intermediate byte array (ToArray() removed)
+      - Added zero-allocation DecodeJpeg(byte[], byte[]) and DecodeJpeg(Stream, byte[]) overloads for repeated frame decoding with no GC pressure
+    </PackageReleaseNotes>
     <Configurations>Release;Debug</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageReadmeFile>README.md</PackageReadmeFile>
