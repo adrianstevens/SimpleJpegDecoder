@@ -6,8 +6,6 @@ namespace SimpleJpegDecoder
 {
     public class JpegDecoder : IDisposable
     {
-        #region Properties
-
         /// <summary>
         /// Width of loaded image in pixels
         /// </summary>
@@ -25,26 +23,14 @@ namespace SimpleJpegDecoder
         /// </summary>
         public bool IsColor => nanoJpeg == null ? false : nanoJpeg.IsColor;
 
-        #endregion
-
-        #region Fields
-
         NanoJpeg.NJImage nanoJpeg;
 
         byte[] decodedData;
-
-        #endregion
-
-        #region Constructor(s)
 
         public JpegDecoder()
         {
             nanoJpeg = new NanoJpeg.NJImage();
         }
-
-        #endregion
-
-        #region Methods
 
         /// <summary>
         /// Decode compressed jpeg from a Stream and
@@ -160,6 +146,5 @@ namespace SimpleJpegDecoder
             decodedData = null;
         }
 
-        #endregion
     }
 }
