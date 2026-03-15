@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SimpleJpegDecoder
 {
-    public class JpegDecoder
+    public class JpegDecoder : IDisposable
     {
         #region Properties
 
@@ -27,7 +27,7 @@ namespace SimpleJpegDecoder
 
         #endregion
 
-        #region Fields 
+        #region Fields
 
         NanoJpeg.NJImage nanoJpeg;
 
@@ -35,7 +35,7 @@ namespace SimpleJpegDecoder
 
         #endregion
 
-        #region Contructor(s)
+        #region Constructor(s)
 
         public JpegDecoder()
         {
@@ -47,7 +47,7 @@ namespace SimpleJpegDecoder
         #region Methods
 
         /// <summary>
-        /// Decode compressed jpeg from a Stream and 
+        /// Decode compressed jpeg from a Stream and
         /// return uncompressed data in a byte array
         /// </summary>
         /// <param name="jpegStream"></param>
@@ -62,7 +62,7 @@ namespace SimpleJpegDecoder
         }
 
         /// <summary>
-        /// Decode compressed jpeg from a byte array and 
+        /// Decode compressed jpeg from a byte array and
         /// return uncompressed data in a byte array
         /// </summary>
         public byte[] DecodeJpeg(byte[] jpegData)
@@ -90,8 +90,19 @@ namespace SimpleJpegDecoder
         /// </summary>
         public void Reset()
         {
+            nanoJpeg.Dispose();
             nanoJpeg = new NanoJpeg.NJImage();
-            decodedData = null; 
+            decodedData = null;
+        }
+
+        /// <summary>
+        /// Releases all resources used by the JpegDecoder
+        /// </summary>
+        public void Dispose()
+        {
+            nanoJpeg?.Dispose();
+            nanoJpeg = null;
+            decodedData = null;
         }
 
         #endregion

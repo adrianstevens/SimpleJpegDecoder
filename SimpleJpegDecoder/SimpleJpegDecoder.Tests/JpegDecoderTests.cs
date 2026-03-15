@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -261,6 +262,70 @@ namespace SimpleJpegDecoder.Tests
             var decoder = new JpegDecoder();
             var notJpeg = new byte[] { 0x00, 0x01, 0x02, 0x03 };
             Assert.Throws<NJException>(() => decoder.DecodeJpeg(new MemoryStream(notJpeg)));
+        }
+
+        // -------------------------------------------------------------------------
+        // IDisposable / Reset dispose
+        // -------------------------------------------------------------------------
+
+        [Fact]
+        public void JpegDecoder_ImplementsIDisposable()
+        {
+            Assert.IsAssignableFrom<IDisposable>(new JpegDecoder());
+        }
+
+        [Fact]
+        public void Dispose_CanBeUsedInUsingBlock()
+        {
+            // Should not throw
+            using (var decoder = new JpegDecoder())
+            {
+                decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            }
+        }
+
+        [Fact]
+        public void Dispose_ClearsProperties()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            decoder.Dispose();
+
+            Assert.Equal(0, decoder.Width);
+            Assert.Equal(0, decoder.Height);
+            Assert.Equal(0, decoder.ImageSize);
+            Assert.Null(decoder.GetImageData());
+        }
+
+        [Fact]
+        public void Dispose_CalledTwice_DoesNotThrow()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            decoder.Dispose();
+            decoder.Dispose(); // should not throw
+        }
+
+        [Fact]
+        public void Reset_CalledMultipleTimes_DoesNotThrow()
+        {
+            var decoder = new JpegDecoder();
+            decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            decoder.Reset();
+            decoder.Reset();
+            decoder.Reset();
+        }
+
+        [Fact]
+        public void Reset_DecodesSuccessfullyAfterMultipleResets()
+        {
+            var decoder = new JpegDecoder();
+            decoder.Reset();
+            decoder.Reset();
+
+            var result = decoder.DecodeJpeg(CreateColorJpeg(8, 8));
+            Assert.Equal(8, decoder.Width);
+            Assert.NotNull(result);
         }
     }
 }
