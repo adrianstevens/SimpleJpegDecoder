@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SimpleJpegDecoder\SimpleJpegDecoder.csproj" />
+  <Project Path="SimpleJpegDecoder.Tests\SimpleJpegDecoder.Tests.csproj" />
+</Solution>
